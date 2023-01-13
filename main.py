@@ -92,6 +92,7 @@ def restart():
 
     wins = 0
     count = 0
+    vel = 10
     game_status = True
     seconds = 225
     
