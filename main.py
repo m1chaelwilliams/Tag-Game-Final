@@ -38,6 +38,7 @@ seconds = 225
 font = py.font.Font('ARCADECLASSIC.ttf', 100)
 title_font = py.font.Font('ARCADECLASSIC.ttf', 200)
 caption_font = py.font.Font('ARCADECLASSIC.ttf', 25)
+mid_font = py.font.Font('ARCADECLASSIC.ttf', 50)
 
 wins = 0
 
@@ -50,11 +51,22 @@ death = mixer.Sound('death.mp3')
 def player(x,y):
     screen.blit(playerImg, rect)
 
-def gameover():
+def gameover(wins):
     global count
     global game_status
     game_status = False
     screen.fill((0,0,0))
+
+    hs = mid_font.render('HIGH SCORE', False, (255,255,255))
+    hs_num = mid_font.render(str(update_highscore(wins)), False, (255,255,255))
+    screen.blit(hs, (230, 250))
+    screen.blit(hs_num, (520, 250))
+    
+
+    final_score = mid_font.render('SCORE', False, (255,255,255))
+    score_num = mid_font.render(str(wins), False, (255,255,255))
+    screen.blit(final_score, (290, 300))
+    screen.blit(score_num, (455, 300))
     game_over = font.render('GAME OVER', False, (255,255,255))
     screen.blit(game_over, (170,355))
     restart = caption_font.render('Press Space to Restart', False, (255,255,255))
@@ -73,7 +85,7 @@ def start_screen():
     start_text = title_font.render('TAG', False, (255,255,255))
     screen.blit(start_text, (230,250))
     press_key = caption_font.render('Press Any Key to Start', False, (255,255,255))
-    screen.blit(press_key, (255,460))
+    screen.blit(press_key, (270,460))
 
 def gamestart():
     global game_status
@@ -96,6 +108,27 @@ def restart():
     game_status = True
     seconds = 225
     
+def generate_xnum():
+    global rect
+    x = r.randint(50,700)
+    if x < rect.x+200 and x > rect.x -200:
+        generate_xnum()
+    return x
+def generate_ynum():
+    global rect
+    y = r.randint(50,700)
+    if y < rect.y +200 and y > rect.y -200:
+        generate_ynum()
+    return y
+
+def update_highscore(wins):
+    with open('file.txt', 'r+') as f:
+        high_score = int(f.readline())
+    if wins > high_score:
+        with open('file.txt', 'w') as f:
+            f.write(str(wins))
+            return wins
+    return high_score
 
 run = True
 
@@ -164,8 +197,9 @@ def game():
             # py.draw.rect(screen, (255, 255, 0), rect)
             rect.x = r.randint(50,730)
             rect.y = r.randint(50,730)
-            obstacle.x = r.randint(50,700)
-            obstacle.y = r.randint(50,700)
+
+            obstacle.x = generate_xnum()
+            obstacle.y = generate_ynum()
             effect = mixer.Sound('effect.wav')
             effect.play()
             wins += 1
@@ -173,9 +207,12 @@ def game():
             seconds = 225
         else:
             if seconds<1:
-                gameover()
+                gameover(wins)
 
         clock.tick(60)
         py.display.update()
 
+
+
+    
 game()
